@@ -1,0 +1,1 @@
+./node_modules/.bin/babel src --out-dir site/lib --presets=@babel/env
