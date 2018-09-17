@@ -56,6 +56,12 @@ command(Request) :-
 
 % initalize
 
+initialize_game(true) :-
+		http_session_retractall(player(_Name, _Zone, _X, _Y, _Lvl, _Hp, _Weapon)),
+		base_player(Name, Zone, X, Y, Lvl, Hp, Weapon),
+		http_session_assert(active_player(Name, Zone, X, Y, Lvl, Hp, Weapon)),
+		initialize(Zone).
+
 base_monster_with_level(Zone,X,Y,Kind,Id,L,HP) :-
 	base_monster(Zone,X,Y,Kind,Id,LevelAdj,HP),
 	http_session_data(player_level(PlayerLevel)),
@@ -72,19 +78,31 @@ all_alive_monsters(AliveMonsters) :-
 	findall(alive_monster(Zone,X,Y,Kind,Id,Level,HP),http_session_data(alive_monster(Zone,X,Y,Kind,Id,Level,HP)),AliveMonsters).
 
 
+game_state_json(JSON) :-
+	all_alive_monsters(AliveMonsters),
+	maplist(alive_to_json,AliveMonsters,JsonMonsters),
+	%JSON = JsonMonsters.
+	http_session_data(active_player(Name, Zone, X, Y, Lvl, Hp, Weapon)),
+	player_to_json(player(Name, Zone, X, Y, Lvl, Hp, Weapon),JsonPlayer),
+	JSON = json([player=JsonPlayer, alive_monsters=JsonMonsters]).
+
 % apply_command
 
 apply_command(info,"Information goes here...").
 apply_command(help,"I know this isn't very helpful...").
 
 apply_command(reset,GameState) :-
-				http_session_retractall(player_level(_)),
-				http_session_retractall(zone(_)),
+				%http_session_retractall(player_level(_)),
+				%http_session_retractall(zone(_)),
 				%%% create new state
-				http_session_assert(player_level(1)),
-				http_session_assert(zone(factory0)),
-				initialize(factory0),
-				all_alive_monsters(Alive),
-				maplist(alive_to_json,Alive,GameState).
+				%http_session_assert(player_level(1)),
+				%http_session_assert(zone(factory0)),
+				%initialize(factory0),
+				initialize_game(true),
+				%all_alive_monsters(Alive),
+				%maplist(alive_to_json,Alive,GameState).
+				game_state_json(GameState).
 
 apply_command(action(A),Result) :- apply_action(A,Result).
+
+%apply_action(rename(A),Result) :- [].

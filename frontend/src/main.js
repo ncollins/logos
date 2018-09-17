@@ -71,7 +71,8 @@ app.stage.addChild(highlighted_graphics);
 drawHighlightedSquares(highlighted_graphics, initialData);
 
 const update = (serverData) => {
-  let newData = serverData.map((x) => x); // currently redundant
+  let player = serverData.player;
+  let newData = serverData.alive_monsters;
   drawHighlightedSquares(highlighted_graphics, newData);
 };
 
