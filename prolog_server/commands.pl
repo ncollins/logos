@@ -28,8 +28,8 @@ action(go(Location)) --> go(Location).
 
 go(named(Location)) --> { location(Location) }, [go, to, Location].
 
-%go(dir(D,C)) --> { direction(D), count(C) }, [ move, D, C ].
 go(dir(D,C)) --> movement, direction(D), count(C).
+go(dir(D,C)) --> movement, count(C), direction(D).
 
 movement --> [ move ].
 
