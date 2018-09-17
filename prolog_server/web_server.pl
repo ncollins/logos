@@ -12,6 +12,7 @@
 :- use_module(library(http/json_convert)).
 
 :- ensure_loaded([commands]).
+:- ensure_loaded([updates]).
 :- ensure_loaded([gamestate]).
 
 
@@ -64,7 +65,7 @@ initialize_game(true) :-
 
 base_monster_with_level(Zone,X,Y,Kind,Id,L,HP) :-
 	base_monster(Zone,X,Y,Kind,Id,LevelAdj,HP),
-	http_session_data(player_level(PlayerLevel)),
+	http_session_data(active_player(_N,_Z,_X,_Y,PlayerLevel,_H,_W)),
 	L is PlayerLevel + LevelAdj.
 
 initialize(Zone) :-
@@ -103,6 +104,13 @@ apply_command(reset,GameState) :-
 				%maplist(alive_to_json,Alive,GameState).
 				game_state_json(GameState).
 
-apply_command(action(A),Result) :- apply_action(A,Result).
+apply_command(action(A),Result) :-
+	apply_action(A),
+	game_state_json(Result).
 
-%apply_action(rename(A),Result) :- [].
+
+apply_command(rename(NewName),Result) :-
+	http_session_data(active_player(_Name, Zone, X, Y, Lvl, Hp, Weapon)),
+	http_session_retractall(active_player(_N,_Z,_X,_Y,_L,_H,_W)),
+	http_session_assert(active_player(NewName, Zone, X, Y, Lvl, Hp, Weapon)),
+	game_state_json(Result).

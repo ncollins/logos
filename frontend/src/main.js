@@ -36,6 +36,17 @@ const makeGridGraphics = () => {
 
 };
 
+const updatePlayer = (graphics, player) => {
+    graphics.clear();
+    let w = app.renderer.width;
+    let h = app.renderer.height;
+    let g = w / 26; // 32 squares and a margin on each side
+    let blue = 0x42dff4;
+    graphics.beginFill(blue, 0.8);
+    graphics.drawCircle(g*(player.x+1.5), g*(player.y+1.5), g/2, g);
+
+}
+
 const drawHighlightedSquares = (graphics, highlighted) => {
 
   graphics.clear();
@@ -67,13 +78,16 @@ let grid = makeGridGraphics();
 app.stage.addChild(grid);
 
 const highlighted_graphics = new PIXI.Graphics();
+const player_graphics = new PIXI.Graphics();
 app.stage.addChild(highlighted_graphics);
+app.stage.addChild(player_graphics);
 drawHighlightedSquares(highlighted_graphics, initialData);
 
 const update = (serverData) => {
   let player = serverData.player;
   let newData = serverData.alive_monsters;
   drawHighlightedSquares(highlighted_graphics, newData);
+  updatePlayer(player_graphics, player);
 };
 
 // jQuery for command input
@@ -92,9 +106,7 @@ $( "#commandform" ).submit(function( event ) {
     dataType: 'json'
   }).done((data) => {
     console.log(`Received: ${data}`);
-    Object.keys(data).forEach((k) => {
-      console.log(data[k]);
-    });
+    console.log(data);
     update(data);
   }).fail((err) => {
     console.log(`${err.responseText}`);
