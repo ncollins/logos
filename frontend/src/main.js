@@ -53,15 +53,15 @@ const drawHighlightedSquares = (graphics, highlighted) => {
 
   graphics.beginFill(orange, 0.8);
 
-  highlighted.forEach((sq) => {
-    let x = sq[0];
-    let y = sq[1];
+  highlighted.forEach((o) => {
+    let x = o.x;
+    let y = o.y;
     graphics.drawRect(g*(x+1), g*(y+1), g, g);
   });
 
 };
 
-const initialData = [[10,3],[10,4],[11,4]];
+const initialData = [{x:10,y:3},{x:10,y:4},{x:11,y:4}];
 
 let grid = makeGridGraphics();
 app.stage.addChild(grid);
@@ -71,7 +71,7 @@ app.stage.addChild(highlighted_graphics);
 drawHighlightedSquares(highlighted_graphics, initialData);
 
 const update = (serverData) => {
-  let newData = serverData.map((x) => [x[1],x[2]]);
+  let newData = serverData.map((x) => x); // currently redundant
   drawHighlightedSquares(highlighted_graphics, newData);
 };
 
@@ -91,6 +91,9 @@ $( "#commandform" ).submit(function( event ) {
     dataType: 'json'
   }).done((data) => {
     console.log(`Received: ${data}`);
+    Object.keys(data).forEach((k) => {
+      console.log(data[k]);
+    });
     update(data);
   }).fail((err) => {
     console.log(`${err.responseText}`);

@@ -54,6 +54,24 @@ command(Request) :-
 				prolog_to_json(Result,Json),
 				reply_json_dict(Json).
 
+% initalize
+
+base_monster_with_level(Zone,X,Y,Kind,Id,L,HP) :-
+	base_monster(Zone,X,Y,Kind,Id,LevelAdj,HP),
+	http_session_data(player_level(PlayerLevel)),
+	L is PlayerLevel + LevelAdj.
+
+initialize(Zone) :-
+	http_session_retractall(alive_monster(_,_,_,_,_,_,_)),
+	findall(alive_monster(Zone,X,Y,Kind,Id,Level,HP),base_monster_with_level(Zone,X,Y,Kind,Id,Level,HP),Monsters),
+	maplist(http_session_assert,Monsters).
+
+% queries
+
+all_alive_monsters(AliveMonsters) :-
+	findall(alive_monster(Zone,X,Y,Kind,Id,Level,HP),http_session_data(alive_monster(Zone,X,Y,Kind,Id,Level,HP)),AliveMonsters).
+
+
 % apply_command
 
 apply_command(info,"Information goes here...").
@@ -62,10 +80,11 @@ apply_command(help,"I know this isn't very helpful...").
 apply_command(reset,GameState) :-
 				http_session_retractall(player_level(_)),
 				http_session_retractall(zone(_)),
-				http_session_retractall(active_monster(_,_,_,_,_)),
 				%%% create new state
 				http_session_assert(player_level(1)),
 				http_session_assert(zone(factory0)),
-				findall([monster,X,Y,N,L,Hp],monster(X,Y,N,L,Hp),GameState).
-				
+				initialize(factory0),
+				all_alive_monsters(Alive),
+				maplist(alive_to_json,Alive,GameState).
+
 apply_command(action(A),Result) :- apply_action(A,Result).
