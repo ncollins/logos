@@ -1,6 +1,8 @@
 % commands
 
-command(action(A)) --> action(A).
+% DCG (difference list) style
+
+command(action_list(L))  --> action_list(L).
 command(rename(A)) --> rename(A).
 command(info) --> info.
 command(help) --> help.
@@ -10,23 +12,26 @@ command(reset) --> [start].
 command(reset) --> [restart].
 
 info --> [info].
-
 help --> [help].
 
-% DCG (difference list) style
+% meta actions
 
-location(home).
-location(office).
+rename(Name) --> [ my, name, is, Name ].
 
-% go(A, B, D) :-
-%	 location(A),
-%	 C=B,
-%	 C=[go, to, A|D].
+% game actions ----------------------------
 
-action(go(Location)) --> go(Location).
-%action(attack(Enemy)) --> attack(Enemy).
+action_list([H|T]) --> action(H), and, action_list(T).
+action_list([H]) --> action(H).
 
-go(named(Location)) --> { location(Location) }, [go, to, Location].
+action(go(dir(D,C))) --> go(dir(D,C)).
+action(attack(dir(D))) --> attack(dir(D)).
+
+and --> [and].
+
+attack(dir(D)) --> attack_word, direction(D).
+
+attack_word --> [ attack ].
+attack_word --> [ hit ].
 
 go(dir(D,C)) --> movement, direction(D), count(C).
 go(dir(D,C)) --> movement, count(C), direction(D).
@@ -45,26 +50,3 @@ direction(west) --> [ left ].
 count(N,[X|Rest],Rest) :-
   atom_number(X,N),
   integer(N).
-
-
-%go(square(X,Y)) --> { sq(Sq,X,Y) }, [go, to, square, Sq].
-
-%attack(Enemy) --> { enemy(Enemy) }, [attack, Enemy].
-%attack(Enemy) --> { enemy(Enemy) }, [fight, Enemy].
-
-rename(Name) --> [ my, name, is, Name ].
-
-%go --> [go, to, fred_house].
-
-
-%sq(Sq,X,Y) :-
-%string_chars(Sq,[XChar,YChar]),
-%string_chars(XStr,[XChar]),
-%string_chars(YStr,[YChar]),
-%atom_string(X,XStr),
-%number_string(Y,YStr).
-
-%apply_action(go(named(home)),[1, 2, 3, 4]) :- !.
-%apply_action(_,"do nothing").
-
-% r{highlighted = [], enemies=[]}

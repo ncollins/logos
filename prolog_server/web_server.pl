@@ -104,8 +104,8 @@ apply_command(reset,GameState) :-
 				%maplist(alive_to_json,Alive,GameState).
 				game_state_json(GameState).
 
-apply_command(action(A),Result) :-
-	apply_action(A),
+apply_command(action_list(Actions),Result) :-
+	apply_action_list(Actions),
 	game_state_json(Result).
 
 
