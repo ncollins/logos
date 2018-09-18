@@ -18,7 +18,6 @@ initialize(Zone) :-
 	findall(alive_monster(Zone,X,Y,Kind,Id,Level,HP),base_monster_with_level(Zone,X,Y,Kind,Id,Level,HP),Monsters),
 	maplist(http_session_assert,Monsters).
 
-
 % player updates
 
 rename_player(NewName) :-
@@ -37,3 +36,7 @@ all_alive_monsters(AliveMonsters) :-
 
 query_player(player(Name,Zone,X,Y,Lvl,Hp,Weapon)) :-
 	http_session_data(active_player(Name, Zone, X, Y, Lvl, Hp, Weapon)).
+
+load_game_state(state(Player,AliveMonsters,_)) :-
+	all_alive_monsters(AliveMonsters),
+	query_player(Player).

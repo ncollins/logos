@@ -51,32 +51,14 @@ command(Request) :-
 				split_string(RawCommand," ","",CommandStrings),
 				maplist(atom_string,Command,CommandStrings),
 				command(Parsed,Command,[]),
-				apply_command(Parsed,Result),
-				prolog_to_json(Result,Json),
+				apply_command(Parsed,GameState),
+				game_state_to_json(GameState,Json),
 				reply_json_dict(Json).
 
 % get JSON output
 
-game_state_json(JSON) :-
-	all_alive_monsters(AliveMonsters),
+game_state_to_json(state(Player,AliveMonsters,Messages),JSON) :-
 	maplist(alive_to_json,AliveMonsters,JsonMonsters),
-	query_player(player(Name,Zone,X,Y,Lvl,Hp,Weapon)),
-	player_to_json(player(Name,Zone,X,Y,Lvl,Hp,Weapon),JsonPlayer),
-	JSON = json([player=JsonPlayer, alive_monsters=JsonMonsters]).
-
-% apply_command
-
-apply_command(info,"Information goes here...").
-apply_command(help,"I know this isn't very helpful...").
-
-apply_command(reset,GameState) :-
-				initialize_game(true),
-				game_state_json(GameState).
-
-apply_command(action_list(Actions),Result) :-
-	apply_action_list(Actions),
-	game_state_json(Result).
-
-apply_command(rename(NewName),Result) :-
-  rename_player(NewName),
-	game_state_json(Result).
+	player_to_json(Player,JsonPlayer),
+  prolog_to_json(Messages, JsonMessages),
+	JSON = json([player=JsonPlayer, alive_monsters=JsonMonsters, messages=JsonMessages]).

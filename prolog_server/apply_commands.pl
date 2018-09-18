@@ -23,3 +23,29 @@ apply_action(go(dir(D,C))) :-
 
 apply_action_list([]).
 apply_action_list([H|T]) :- apply_action(H), apply_action_list(T).
+
+
+% apply_command
+
+apply_command(info,GameState) :-
+  load_game_state(state(Player,AliveMonsters,_)),
+	GameState = state(Player,AliveMonsters,["info goes here..."]).
+
+apply_command(help,GameState) :-
+  load_game_state(state(Player,AliveMonsters,_)),
+	GameState = state(Player,AliveMonsters,["not very helpful"]).
+
+apply_command(reset,GameState) :-
+	initialize_game(true),
+  load_game_state(state(Player,AliveMonsters,_)),
+	GameState = state(Player,AliveMonsters,[]).
+
+apply_command(action_list(Actions),GameState) :-
+	apply_action_list(Actions),
+  load_game_state(state(Player,AliveMonsters,_)),
+	GameState = state(Player,AliveMonsters,[]).
+
+apply_command(rename(NewName),GameState) :-
+  rename_player(NewName),
+  load_game_state(state(Player,AliveMonsters,_)),
+	GameState = state(Player,AliveMonsters,[]).
